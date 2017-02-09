@@ -1,10 +1,85 @@
-<!DOCTYPE html5 PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Dummy</title>
-</head>
-<body>
-  Hello World!
-</body>
+<!doctype html>
+<html ng-app="app">
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-touch.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
+    <script src="http://ui-grid.info/release/ui-grid.js"></script>
+    <link rel="stylesheet" href="http://ui-grid.info/release/ui-grid.css" type="text/css">
+    <link rel="stylesheet" href="main.css" type="text/css">
+  </head>
+  <body>
+
+<div ng-controller="MainCtrl">
+  Try clicking the Add button to add the company column.
+  Try clicking the Remove button to remove the last column.
+  Try clicking the Splice button to insert a column in the middle.
+  <br>
+  <br>
+  <button id="button_add" class="btn" ng-click="add()">Add</button>
+  <button id="button_remove" class="btn" ng-click="remove()">Remove Last</button>
+  <button id="button_splice" class="btn" ng-click="splice()">Splice</button>
+  <button id="button_unsplice" class="btn" ng-click="unsplice()">Remove Middle</button>
+  <button id="button_toggle_visible" class="btn" ng-click="toggleVisible()">Toggle Visible</button>
+  <button id="button_toggle_display_name" class="btn" ng-click="toggleDisplayName()">Toggle Display Name</button>
+  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+</div>
+
+
+    <script type="text/javascript">
+      var app = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+
+app.controller('MainCtrl', ['$scope', '$http', 'uiGridConstants', function ($scope, $http, uiGridConstants) {
+  $scope.columns = [{ field: 'name' }, { field: 'gender' }];
+  $scope.gridOptions = {
+    enableSorting: true,
+    columnDefs: $scope.columns,
+    onRegisterApi: function(gridApi) {
+      $scope.gridApi = gridApi;
+    }
+  };
+  
+  $scope.remove = function() {
+    $scope.columns.splice($scope.columns.length-1, 1);
+  }
+  
+  $scope.add = function() {
+    $scope.columns.push({ field: 'company', enableSorting: false });
+  }
+
+  $scope.splice = function() {
+    $scope.columns.splice(1, 0, { field: 'company', enableSorting: false });
+  }
+
+  $scope.unsplice = function() {
+    $scope.columns.splice(1, 1);
+  }
+  
+  $scope.toggleDisplayName = function() {
+    if( $scope.columns[1].displayName === 'GENDER' ){
+      $scope.columns[1].displayName = 'Gender';
+    } else {
+      $scope.columns[1].displayName = 'GENDER';
+    }
+    $scope.gridApi.core.notifyDataChange( uiGridConstants.dataChange.COLUMN );
+  }
+  
+  $scope.toggleVisible = function() {
+    $scope.columns[0].visible = !($scope.columns[0].visible || $scope.columns[0].visible === undefined);
+    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+  }
+
+  $http.get('https://cdn.rawgit.com/angular-ui/ui-grid.info/gh-pages/data/100.json')
+    .success(function(data) {
+      $scope.gridOptions.data = data;
+    });
+}]);
+    </script>
+    
+    
+    
+  </body>
 </html>
